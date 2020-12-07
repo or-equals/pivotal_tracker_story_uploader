@@ -23,20 +23,23 @@ defmodule Uploader do
   end
 
   defp reader do
-    File.read("Test_2.txt")
+    File.read("Test.txt")
   end
 
   defp token do
     {:ok, content} = reader()
       [author, _] = String.split(content, "\n\n")
         cond do
-          author == "Filip" -> "token=9098827fecd66a81096c400e1f4aa229"
-          author == "Josh" -> "token=f77ecb7431c05f212a2d7928e3b5a069"
+          author == "Filip" ->
+            Application.fetch_env!(:notion_uploader, :key_1)
+
+          author == "Josh" ->
+            Application.fetch_env!(:notion_uploader, :key_2)
         end
   end
 
-  def url_builder do
-    url = "https://www.pivotaltracker.com/services/v5/projects/2460713/stories?"
+  defp url_builder do
+    url = "https://www.pivotaltracker.com/services/v5/projects/2460713/stories"
     url <> token()
   end
 
