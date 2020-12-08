@@ -1,12 +1,12 @@
 defmodule NotionUploader.Uploader do
 
-  alias NotionUploader.Parser
+  alias NotionUploader.Controller
   alias NotionUploader.UrlBuilder
 
   def upload() do
     map = %{estimate: 2, owner_ids: [3352514,1426364]}
 
-    Enum.each(Parser.get_stories(), fn story ->
+    Enum.each(Controller.get_stories(), fn story ->
       map = Map.put(map, :name, story)
       formatted_body = Poison.encode!(map)
       HTTPoison.post(

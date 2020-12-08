@@ -1,4 +1,4 @@
-defmodule NotionUploader.Parser do
+defmodule NotionUploader.Controller do
 
   alias NotionUploader.Uploader
   alias NotionUploader.UrlBuilder
