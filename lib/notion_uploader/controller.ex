@@ -7,10 +7,10 @@ defmodule NotionUploader.Controller do
     author = get_author()
       cond do
         author == "Filip" ->
-          Application.fetch_env!(:notion_uploader, :key_1)
+          "?token=" <> Application.fetch_env!(:notion_uploader, :key_1)
 
         author == "Josh" ->
-          Application.fetch_env!(:notion_uploader, :key_2)
+          "?token=" <> Application.fetch_env!(:notion_uploader, :key_2)
 
         author != "Filip" || author != "Josh" ->
           IO.puts("Invalid author")
@@ -21,7 +21,7 @@ defmodule NotionUploader.Controller do
     case Uploader.reader() do
       {:ok, content} ->
         [top, _] = String.split(content, "\n\n")
-        [author, _] = String.split(top, "\n")
+        [author, _, _] = String.split(top, "\n")
         author
       {:error, content} -> "This is your error: #{content}"
     end
@@ -63,9 +63,52 @@ defmodule NotionUploader.Controller do
     case Uploader.reader() do
       {:ok, content} ->
         [top, _] = String.split(content, "\n\n")
-        [_, project_name] = String.split(top, "\n")
+        [_, project_name, _] = String.split(top, "\n")
         project_name
       {:error, content} -> "This is your error: #{content}"
     end
   end
+
+  def get_member_list do
+    case HTTPoison.get(UrlBuilder.url_members()) do
+      {:ok, %HTTPoison.Response{body: body}} ->
+        Poison.decode(body)
+    end
+  end
+
+  def modify_member_list do
+    {:ok, list} = get_member_list()
+      for person <- list do
+        map = %{}
+        Map.merge(map, %{
+          name: person["person"]["name"],
+          id: person["person"]["id"]
+        })
+    end
+  end
+
+  def owner_ids do
+    for owner <- owners_map() do
+      owner.id
+    end
+  end
+
+  defp owners_map do
+    Enum.filter(modify_member_list(), fn member -> member.name in get_owners_list() end)
+  end
+
+  def get_owners_list do
+    case Uploader.reader() do
+      {:ok, content} ->
+        [top, _] = String.split(content, "\n\n")
+        [_, _, owners] = String.split(top, "\n")
+
+        String.split(owners, ",")
+          |> Enum.map(fn owner -> String.trim(owner) end)
+
+      {:error, content} -> "This is your error: #{content}"
+    end
+  end
+
+
 end

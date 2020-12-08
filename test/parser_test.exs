@@ -1,7 +1,3 @@
-defmodule ControllerTest do
-  use ExUnit.Case
-
-  alias NotionUploader.Controller
 
   # test "Filip" do
   #   assert Controller.get_api_token() ==
@@ -11,9 +7,6 @@ defmodule ControllerTest do
   #   assert Controller.get_api_token() ==
   # end
 
-  test "test" do
-    assert Api.get_project_id() == 2479568
-  end
-
-
-end
+  # test "test" do
+  #   assert Api.get_project_id() == 2479568
+  # end
