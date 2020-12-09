@@ -3,12 +3,14 @@ defmodule ControllerTest do
 
   alias NotionUploader.Controller
 
-  test "test get_author, Filip" do
-    assert Controller.get_author() == "Filip"
+  test "extract_token, Filip" do
+    string = Controller.reader(Application.fetch_env!(:notion_uploader, :file_valid))
+    assert Controller.extract_token(string) == "?token=1234"
   end
 
-  test "test get_author, invalid" do
-    assert Controller.get_author() == "Invalid author"
+  test "extract_token, invalid" do
+    string = Controller.reader(Application.fetch_env!(:notion_uploader, :file_invalid))
+    assert Controller.extract_token(string) == "Invalid author"
   end
 
 end

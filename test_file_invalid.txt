@@ -1,6 +1,6 @@
 Fili
-Local Fare Jax
-Joshua Plique, Filip Telak 
+Test Project
+Filip Telak, Joshua Plicque
 
 New Story #1
 New Story #2

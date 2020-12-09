@@ -1,44 +1,48 @@
 defmodule NotionUploader.Controller do
 
-  alias NotionUploader.Uploader
-  alias NotionUploader.UrlBuilder
+  @url "https://www.pivotaltracker.com/services/v5/projects"
 
-  def get_api_token do
-    author = get_author()
-      cond do
-        author == "Filip" ->
-          "?token=" <> Application.fetch_env!(:notion_uploader, :key_1)
-
-        author == "Josh" ->
-          "?token=" <> Application.fetch_env!(:notion_uploader, :key_2)
-
-        author != "Filip" || author != "Josh" ->
-          IO.puts("Invalid author")
-      end
+  def get_api_token(file) do
+    file
+    |> reader
+    |> extract_token
   end
 
-  def get_author do
-    case Uploader.reader() do
-      {:ok, content} ->
-        [top, _] = String.split(content, "\n\n")
-        [author, _, _] = String.split(top, "\n")
-        author
-      {:error, content} -> "This is your error: #{content}"
+  def reader(file) do
+    {:ok, content} = File.read(file)
+    content |> String.trim()
+  end
+
+  def extract_token(string) do
+    [top, _stories] = String.split(string, "\n\n")
+    [author, _project, _owners] = String.split(top, "\n")
+
+    cond do
+      author == "Filip" ->
+        "?token=" <> Application.fetch_env!(:notion_uploader, :token_1)
+
+      author == "Josh" ->
+        "?token=" <> Application.fetch_env!(:notion_uploader, :token_2)
+
+      author != "Filip" || author != "Josh" ->
+        "Invalid author"
     end
   end
 
-  def get_stories do
-    case Uploader.reader() do
-      {:ok, content} ->
-        [_, headers] = String.split(content, "\n\n")
-        String.split(headers, "\n")
 
-      {:error, content} -> "This is your error: #{content}"
-    end
+  def get_project_id(url, file) do
+    url
+    |> url_with_token
+    |> list_projects
+    |> extract_project_id(file)
   end
 
-  def list_projects do
-    case HTTPoison.get(UrlBuilder.url_get()) do
+  def url_with_token(string) do
+    @url <> string
+  end
+
+  def list_projects(string) do
+    case HTTPoison.get(string) do
       {:ok, %HTTPoison.Response{body: body}} ->
         {:ok, body} = Poison.decode(body)
         body
@@ -48,67 +52,95 @@ defmodule NotionUploader.Controller do
     end
   end
 
-  def compare_project_names do
-    Enum.find(list_projects(), fn project ->
-        Map.get(project, "name") == get_project_name()
+  def extract_project_id(list, file) do
+    Enum.find(list, fn project ->
+      Map.get(project, "name") == get_project_name(file)
     end)
+    |> Map.get("id")
+    |> to_string
   end
 
-  def get_project_id do
-    map = compare_project_names()
-    Map.get(map, "id")
+  def get_project_name(file) do
+    content = reader(file)
+      [top, _stories] = String.split(content, "\n\n")
+      [_author, project, _owners] = String.split(top, "\n")
+      project
   end
 
-  def get_project_name do
-    case Uploader.reader() do
-      {:ok, content} ->
-        [top, _] = String.split(content, "\n\n")
-        [_, project_name, _] = String.split(top, "\n")
-        project_name
-      {:error, content} -> "This is your error: #{content}"
-    end
+
+  def get_owners(url, file) do
+    url
+    |> create_url(file)
+    |> get_members
+    |> modify_members
+    |> create_owners_map(file)
+    |> get_owner_ids
   end
 
-  def get_member_list do
-    case HTTPoison.get(UrlBuilder.url_members()) do
+  def create_url(string, file) do
+    content = reader(file)
+    @url <> "/" <> string <> "/memberships" <> extract_token(content)
+  end
+
+  def get_members(url) do
+    case HTTPoison.get(url) do
       {:ok, %HTTPoison.Response{body: body}} ->
         Poison.decode(body)
     end
   end
 
-  def modify_member_list do
-    {:ok, list} = get_member_list()
+  def modify_members(list) do
+    {:ok, list} = list
       for person <- list do
-        map = %{}
-        Map.merge(map, %{
+        Map.merge(%{}, %{
           name: person["person"]["name"],
           id: person["person"]["id"]
         })
     end
   end
 
-  def owner_ids do
-    for owner <- owners_map() do
+  def create_owners_map(list, file) do
+    Enum.filter(list, fn member ->
+      member.name in get_owners_list(file) end)
+  end
+
+  def get_owners_list(file) do
+    content = reader(file)
+        [top, _stories] = String.split(content, "\n\n")
+        [_author, _project, owners] = String.split(top, "\n")
+
+        String.split(owners, ",")
+          |> Enum.map(fn owner -> String.trim(owner) end)
+  end
+
+  def get_owner_ids(map) do
+    for owner <- map do
       owner.id
     end
   end
 
-  defp owners_map do
-    Enum.filter(modify_member_list(), fn member -> member.name in get_owners_list() end)
+
+  def list_stories(file) do
+    file
+    |> reader
+    |> get_stories
   end
 
-  def get_owners_list do
-    case Uploader.reader() do
-      {:ok, content} ->
-        [top, _] = String.split(content, "\n\n")
-        [_, _, owners] = String.split(top, "\n")
-
-        String.split(owners, ",")
-          |> Enum.map(fn owner -> String.trim(owner) end)
-
-      {:error, content} -> "This is your error: #{content}"
-    end
+  def get_stories(string) do
+    [_top, headers] = String.split(string, "\n\n")
+    String.split(headers, "\n")
   end
 
+
+  def url_builder(file) do
+    @url
+    <> "/"
+    <> get_project_id(
+          get_api_token(file),
+          file
+          )
+    <> "/stories"
+    <> get_api_token(file)
+  end
 
 end

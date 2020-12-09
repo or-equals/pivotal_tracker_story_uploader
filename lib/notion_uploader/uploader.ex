@@ -1,27 +1,30 @@
 defmodule NotionUploader.Uploader do
 
   alias NotionUploader.Controller
-  alias NotionUploader.UrlBuilder
 
-  def upload() do
+  def upload(file) do
     map = %{
       estimate: 2,
-      owner_ids: Controller.owner_ids()
+      owner_ids: owners(file)
     }
 
-    Enum.each(Controller.get_stories(), fn story ->
+    Enum.each(Controller.list_stories(file), fn story ->
       map = Map.put(map, :name, story)
 
       formatted_body = Poison.encode!(map)
 
       HTTPoison.post(
-        "#{UrlBuilder.url_builder()}",
+        "#{Controller.url_builder(file)}",
         "#{formatted_body}",
         [{"Content-Type", "application/json"}])
     end)
   end
 
-  def reader do
-    File.read("Test_2.txt")
+  def owners(file) do
+    file
+    |> Controller.get_api_token
+    |> Controller.get_project_id(file)
+    |> Controller.get_owners(file)
   end
+
 end
