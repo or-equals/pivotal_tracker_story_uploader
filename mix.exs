@@ -1,9 +1,9 @@
-defmodule NotionUploader.MixProject do
+defmodule PivotalTrackerStoryUploader.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :notion_uploader,
+      app: :pivotal_tracker_story_uploader,
       version: "0.1.0",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
