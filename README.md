@@ -3,12 +3,24 @@ A program designed to add new stories to the Pivotal Tracker Icebox by submiting
 
 ## Getting Started
 
+Add dependencies: 
 ```
 {:poison, "~> 3.1"},
 {:httpoison, "~> 1.7"},
 ```
 
 ## How to Use
+
+The .txt file must follow the following format:
+author_name
+project_name
+owner_names
+
+sample_story_1
+sample_story_2
+...
+
+
 ```
 Command line:
 PivotalTrackerStoryUploader.Controller.run("test.txt")
