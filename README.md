@@ -11,7 +11,8 @@ Add dependencies:
 
 ## How to Use
 
-The .txt file must follow the following format: <br>
+The .txt file must have the following format: <br>
+<br>
 author_name<br>
 project_name<br>
 owner_names<br>
@@ -21,7 +22,7 @@ sample_story_2<br>
 ...
 
 
-```
 Command line:
+```
 PivotalTrackerStoryUploader.Controller.run("test.txt")
 ```
