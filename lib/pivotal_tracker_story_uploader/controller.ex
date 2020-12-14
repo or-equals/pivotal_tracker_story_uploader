@@ -7,7 +7,7 @@ defmodule PivotalTrackerStoryUploader.Controller do
 
   def run(file) do
     file
-    |> params
+    |> create_payload
   end
 
   def reader(file) do
@@ -26,15 +26,15 @@ defmodule PivotalTrackerStoryUploader.Controller do
     String.split(headers, "\n")
   end
 
-  defp params(file) do
+  def create_payload(file) do
     for story <- get_stories(file) do
-      Map.merge(%{}, %{
+      %{
         name: story,
         estimate: 2,
         owner_ids: Owners.get_owners(file)
-        })
+      }
 
-      |> HttpAdapter.process_request_body
+      |> HttpAdapter.encode_params_to_json
       |> post_params(file)
     end
   end

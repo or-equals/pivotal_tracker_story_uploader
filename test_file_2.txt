@@ -1,0 +1,6 @@
+sample_author_2
+sample_project_name
+sample_owner_1, sample_owner_2
+
+New story 1
+New story 2
