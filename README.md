@@ -11,13 +11,13 @@ Add dependencies:
 
 ## How to Use
 
-The .txt file must follow the following format:
-author_name
-project_name
-owner_names
+The .txt file must follow the following format: <br>
+author_name<br>
+project_name<br>
+owner_names<br>
 
-sample_story_1
-sample_story_2
+sample_story_1<br>
+sample_story_2<br>
 ...
 
 
