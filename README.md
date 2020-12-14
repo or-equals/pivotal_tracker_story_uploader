@@ -1,21 +1,15 @@
-# NotionUploader
+# Pivotal Tracker Story Uploader
+A program designed to add new stories to the Pivotal Tracker Icebox by submiting post requests to the Pivotal Tracker API .
 
-**TODO: Add description**
+## Getting Started
 
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `pivotal_tracker_story_uploader` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:pivotal_tracker_story_uploader, "~> 0.1.0"}
-  ]
-end
+```
+{:poison, "~> 3.1"},
+{:httpoison, "~> 1.7"},
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/pivotal_tracker_story_uploader](https://hexdocs.pm/pivotal_tracker_story_uploader).
-
+## How to Use
+```
+Command line:
+PivotalTrackerStoryUploader.Controller.run("test.txt")
+```
